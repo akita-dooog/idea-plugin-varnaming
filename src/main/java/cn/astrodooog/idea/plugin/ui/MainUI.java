@@ -7,6 +7,7 @@ import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import com.intellij.ui.content.ContentFactory;
 import com.kenai.jffi.Main;
+import net.sf.cglib.core.internal.Function;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,34 +18,41 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainUI {
     private JPanel mainPanel;
-    private JTabbedPane tabbedPane1;
     private JTextField textField;
     private JButton searchBtn;
-    private JList xtList;
-    private JList udList;
-    private JList ctList;
+    private JList list;
+    private JButton xtBtn;
+    private JButton udBtn;
+    private JButton scBtn;
 
-    private DefaultListModel<String> xtListModel;
-    private DefaultListModel<String> udListModel;
-    private DefaultListModel<String> ctListModel;
+    private Integer model = 1;
+
+    private static final Integer XT_MODEL = 1;
+
+    private static final Integer UD_MODEL = 2;
+
+    private static final Integer SC_MODEL = 3;
+
+    private DefaultListModel<String> listModel;
+
+    private List<String> dataList = new ArrayList<>();
 
     public static final String FANYI_API = "http://fanyi.youdao.com/openapi.do?&keyfrom=CoderVar&key=802458398&type=data&doctype=json&version=1.1&q={}";
 
     public MainUI() {
-        xtListModel = new DefaultListModel<>();
-        xtList.setModel(xtListModel);
-        xtList.addKeyListener(copyListener());
+        listModel = new DefaultListModel<>();
+        list.setModel(listModel);
+        list.addKeyListener(copyListener());
 
-        udListModel = new DefaultListModel<>();
-        udList.setModel(udListModel);
-        xtList.addKeyListener(copyListener());
-
-        ctListModel = new DefaultListModel<>();
-        ctList.setModel(ctListModel);
-        ctList.addKeyListener(copyListener());
+        xtBtn.addActionListener(e -> refreshList(XT_MODEL));
+        udBtn.addActionListener(e -> refreshList(UD_MODEL));
+        scBtn.addActionListener(e -> refreshList(SC_MODEL));
 
         searchBtn.addActionListener(e -> {
             String text = textField.getText();
@@ -52,27 +60,36 @@ public class MainUI {
                 return;
             }
 
-            xtListModel.clear();
-            udListModel.clear();
-
             String res = HttpUtil.get(StrUtil.format(FANYI_API, text));
             System.out.println(res);
             TransferRes transferRes = JSONUtil.toBean(res, TransferRes.class, true);
 
-            transferRes.getTranslation().forEach(t -> {
-                xtListModel.addElement(toCamelCase(t));
-                udListModel.addElement(toUnderline(t));
-                ctListModel.addElement(toConstantVar(t));
-            });
+            dataList.addAll(transferRes.getTranslation());
 
             transferRes.getWeb().forEach(web -> {
-                web.getValue().forEach(wi -> {
-                    xtListModel.addElement(toCamelCase(wi));
-                    udListModel.addElement(toUnderline(wi));
-                    ctListModel.addElement(toConstantVar(wi));
-                });
+                dataList.addAll(web.getValue());
             });
+
+            refreshList(model);
         });
+    }
+
+    private void refreshList(Integer model) {
+        listModel.clear();
+
+        List<String> varList = dataList.stream().map(oriSentence -> {
+            if (UD_MODEL.equals(model)) {
+                return toUnderline(oriSentence);
+            }
+
+            if (SC_MODEL.equals(model)) {
+                return toConstantVar(oriSentence);
+            }
+
+            return toCamelCase(oriSentence);
+        }).collect(Collectors.toList());
+
+        listModel.addAll(varList);
     }
 
     private KeyAdapter copyListener() {
@@ -113,9 +130,8 @@ public class MainUI {
 
     private Clipboard getSystemClipboard(){
         Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
-        Clipboard systemClipboard = defaultToolkit.getSystemClipboard();
 
-        return systemClipboard;
+        return defaultToolkit.getSystemClipboard();
     }
 
 

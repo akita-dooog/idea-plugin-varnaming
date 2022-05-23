@@ -1,0 +1,27 @@
+<idea-plugin>
+    <id>org.example.varnaming</id>
+    <name>varnaming</name>
+    <vendor email="hey@hey.com" url="http://hey.hey.com">hey</vendor>
+
+    <description><![CDATA[
+    这是一个IDEA插件，变量命名工具<br>
+    支持以下命名格式<br>
+    <em>大驼峰</em>
+      <em>小驼峰</em>
+      <em>下划线</em>
+      <em>静态变量</em>
+    ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- 窗体 (IDEA 界面右侧) -->
+        <toolWindow id="Varnaming" secondary="false" anchor="right" factoryClass="cn.astrodooog.idea.plugin.factory.NamingFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>

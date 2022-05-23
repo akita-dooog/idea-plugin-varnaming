@@ -1,0 +1,39 @@
+plugins {
+    id 'org.jetbrains.intellij' version '1.5.2'
+    id 'java'
+}
+
+apply plugin: "org.jetbrains.intellij"
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation 'cn.hutool:hutool-all:5.8.1'
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version = '2021.2.2'
+}
+patchPluginXml {
+    changeNotes = """
+      支持以下变量方式<br>
+      <em>大驼峰</em>
+      <em>小驼峰</em>
+      <em>下划线</em>
+      <em>静态变量</em>"""
+}
+test {
+    useJUnitPlatform()
+}

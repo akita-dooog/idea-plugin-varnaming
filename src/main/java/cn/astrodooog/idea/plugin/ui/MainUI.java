@@ -3,11 +3,8 @@ package cn.astrodooog.idea.plugin.ui;
 import cn.astrodooog.idea.plugin.model.TransferRes;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
-import com.intellij.ui.content.ContentFactory;
-import com.kenai.jffi.Main;
-import net.sf.cglib.core.internal.Function;
+import com.intellij.openapi.ui.Messages;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,18 +17,17 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MainUI {
     private JPanel mainPanel;
     private JTextField textField;
     private JButton searchBtn;
-    private JList list;
+    private JList<String> list;
     private JButton xtBtn;
-    private JButton udBtn;
+    private JButton ulBtn;
     private JButton scBtn;
-
-    private Integer model = 1;
 
     private static final Integer XT_MODEL = 1;
 
@@ -39,9 +35,9 @@ public class MainUI {
 
     private static final Integer SC_MODEL = 3;
 
-    private DefaultListModel<String> listModel;
+    private final DefaultListModel<String> listModel;
 
-    private List<String> dataList = new ArrayList<>();
+    private final List<String> dataList = new ArrayList<>();
 
     public static final String FANYI_API = "http://fanyi.youdao.com/openapi.do?&keyfrom=CoderVar&key=802458398&type=data&doctype=json&version=1.1&q={}";
 
@@ -51,7 +47,7 @@ public class MainUI {
         list.addKeyListener(copyListener());
 
         xtBtn.addActionListener(e -> refreshList(XT_MODEL));
-        udBtn.addActionListener(e -> refreshList(UD_MODEL));
+        ulBtn.addActionListener(e -> refreshList(UD_MODEL));
         scBtn.addActionListener(e -> refreshList(SC_MODEL));
 
         searchBtn.addActionListener(e -> {
@@ -60,17 +56,29 @@ public class MainUI {
                 return;
             }
 
-            String res = HttpUtil.get(StrUtil.format(FANYI_API, text));
-            System.out.println(res);
-            TransferRes transferRes = JSONUtil.toBean(res, TransferRes.class, true);
+            dataList.clear();
 
-            dataList.addAll(transferRes.getTranslation());
+            try {
+                String res = HttpUtil.get(StrUtil.format(FANYI_API, text));
+                System.out.println(res);
+                TransferRes transferRes = JSONUtil.toBean(res, TransferRes.class, false);
 
-            transferRes.getWeb().forEach(web -> {
-                dataList.addAll(web.getValue());
-            });
+                if (Objects.nonNull(transferRes.getTranslation())
+                        && transferRes.getTranslation().size() > 0) {
+                    dataList.addAll(transferRes.getTranslation());
+                }
 
-            refreshList(model);
+                if (Objects.nonNull(transferRes.getWeb())
+                        && transferRes.getWeb().size() > 0) {
+                    transferRes.getWeb().forEach(web -> {
+                        dataList.addAll(web.getValue());
+                    });
+                }
+
+                refreshList(XT_MODEL);
+            } catch (Exception exception) {
+                Messages.showMessageDialog("出现异常", "错误", Messages.getErrorIcon());
+            }
         });
     }
 

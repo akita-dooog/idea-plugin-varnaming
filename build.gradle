@@ -5,7 +5,7 @@ plugins {
 
 apply plugin: "org.jetbrains.intellij"
 
-group 'org.example'
+group 'cn.astrodooog'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -24,16 +24,19 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version = '2020.2.2'
+    version = '2020.1.4'
 }
 patchPluginXml {
     changeNotes = """
       支持以下变量方式<br>
-      <em>大驼峰</em>
       <em>小驼峰</em>
       <em>下划线</em>
       <em>静态变量</em>"""
 }
 test {
     useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile) {
+    options.setEncoding("UTF-8")
 }

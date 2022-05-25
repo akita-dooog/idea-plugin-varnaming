@@ -1,12 +1,11 @@
 <idea-plugin>
-    <id>org.example.varnaming</id>
+    <id>cn.astrodooog.idea.plugin</id>
     <name>varnaming</name>
     <vendor email="hey@hey.com" url="http://hey.hey.com">hey</vendor>
 
     <description><![CDATA[
     这是一个IDEA插件，变量命名工具<br>
     支持以下命名格式<br>
-    <em>大驼峰</em>
       <em>小驼峰</em>
       <em>下划线</em>
       <em>静态变量</em>
